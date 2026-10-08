@@ -1,0 +1,7 @@
+.venv/
+.idea/
+__pycache__/
+EXPERIMENTS.md
+outputs/
+src/annotate.py
+data/
