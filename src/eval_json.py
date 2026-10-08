@@ -1,6 +1,6 @@
 
 import json
-from src.prompts import ALLOWED_TOPICS, ALLOWED_SENTIMENT, ALLOWED_CONFIDENCE
+from src.prompts import ALLOWED_TOPICS, ALLOWED_SENTIMENT
 
 
 def parse_strict(raw: str):
@@ -13,38 +13,37 @@ def parse_strict(raw: str):
 def check_schema(obj) -> bool:
     if not isinstance(obj, dict):
         return False
-    if set(obj.keys()) != {"sentiment", "confidence", "topics", "issue_count"}:
+    if set(obj.keys()) != {"stars", "sentiment", "topics", "recommend"}:
         return False
     return (
-        isinstance(obj["sentiment"], str)
-        and isinstance(obj["confidence"], str)
+        isinstance(obj["stars"], int) and not isinstance(obj["stars"], bool)
+        and isinstance(obj["sentiment"], str)
         and isinstance(obj["topics"], list)
-        and isinstance(obj["issue_count"], int)
-        and not isinstance(obj["issue_count"], bool)
+        and isinstance(obj["recommend"], bool)
     )
 
 
 def check_enums(obj) -> bool:
     return (
-        obj["sentiment"] in ALLOWED_SENTIMENT
-        and obj["confidence"] in ALLOWED_CONFIDENCE
+        1 <= obj["stars"] <= 5
+        and obj["sentiment"] in ALLOWED_SENTIMENT
         and all(t in ALLOWED_TOPICS for t in obj["topics"])
     )
 
 
 def check_exact(obj, gold) -> bool:
     return (
-        obj["sentiment"] == gold["sentiment"]
-        and obj["confidence"] == gold["confidence"]
+        obj["stars"] == gold["stars"]
+        and obj["sentiment"] == gold["sentiment"]
         and sorted(obj["topics"]) == sorted(gold["topics"])
-        and obj["issue_count"] == gold["issue_count"]
+        and obj["recommend"] == gold["recommend"]
     )
 
 
 def evaluate(predictions: list[str], golds: list[dict]) -> dict:
     n = len(predictions)
     valid, schema, enums, exact = 0, 0, 0, 0
-    per_field = {"sentiment": 0, "confidence": 0, "topics": 0, "issue_count": 0}
+    per_field = {"stars": 0, "sentiment": 0, "topics": 0, "recommend": 0}
 
     for raw, gold in zip(predictions, golds):
         obj = parse_strict(raw)
