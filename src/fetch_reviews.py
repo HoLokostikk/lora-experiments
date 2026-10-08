@@ -23,12 +23,13 @@ for row in ds:
     seen.add(t[:30])
     buckets[star].append(t)
 
-texts = [t for b in buckets.values() for t in b]
+items = [{"text": t, "stars": star + 1}          # label 0..4 → 1..5 зірок
+         for star, texts in buckets.items() for t in texts]
 random.seed(0)
-random.shuffle(texts)
+random.shuffle(items)
 
 with open("data/raw_texts.json", "w") as f:
-    json.dump({"test": texts[:60], "train": texts[60:520], "val": texts[520:580]},
+    json.dump({"test": items[:60], "train": items[60:520], "val": items[520:580]},
               f, indent=2, ensure_ascii=False)
 
-print({k: len(v) for k, v in sorted(buckets.items())}, "→", len(texts))
+print({k + 1: len(v) for k, v in sorted(buckets.items())}, "→", len(items))

@@ -11,8 +11,8 @@ def generate(model: str, prompt: str) -> str:
         "model": model,
         "prompt": prompt,
         "stream": False,
-        "options": {"temperature": 0, "seed": 0},
-    }, timeout=120)
+        "options": {"temperature": 0, "seed": 0, "num_predict": 200},
+    }, timeout=600)
     r.raise_for_status()
     return r.json()["response"]
 
